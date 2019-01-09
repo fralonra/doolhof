@@ -67,7 +67,7 @@ function generateMaze (cells, opt) {
     currentPath.visited = true
     removeFromCellList(unVisitedPaths, currentPath)
     const nearPaths = getNearPaths(cells, currentPath)
-    const availableNearPaths = []
+    // const availableNearPaths = []
     // nearPaths.forEach(c => {
     //   if (!c) return
     //   if (!c.visited) availableNearPaths.push(c)
