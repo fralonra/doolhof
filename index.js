@@ -1,12 +1,14 @@
-const TYPE_PATH = 0
-const TYPE_WALL = 1
+const chalk = require('chalk')
+
+const TYPE_WALL = 0
+const TYPE_PATH = '+'
 
 class Labyrinth {
   constructor (opt) {
     const defaultOptions = {
       generate: true,
-      row: 10,
-      col: 10,
+      row: 5,
+      col: 5,
       start: [0, 0]
     }
     defaultOptions.end = [defaultOptions.row - 1, defaultOptions.col - 1]
@@ -64,8 +66,8 @@ function generateMaze (cells, opt) {
   const unVisitedPaths = flat(cells).filter(c => c.type === TYPE_PATH).map(c => [c.col, c.row])
   let currentPath = cells[2 * start[0] + 1][2 * start[1] + 1]
   while (unVisitedPaths.length) {
-    currentPath.visited = true
-    removeFromCellList(unVisitedPaths, currentPath)
+    // console.log(unVisitedPaths)
+    console.log(currentPath)
     const nearPaths = getNearPaths(cells, currentPath)
     // const availableNearPaths = []
     // nearPaths.forEach(c => {
@@ -74,8 +76,10 @@ function generateMaze (cells, opt) {
     // })
     // currentPath = availableNearPaths[random(availableNearPaths.length)]
     const index = random(nearPaths.length)
-    const nextPath = nearPaths[index]
+    let nextPath = nearPaths[index]
     if (nextPath) {
+      currentPath.visited = true
+      removeFromCellList(unVisitedPaths, currentPath)
       let wallToBeBreak
       switch (index) {
         case 0:
@@ -92,12 +96,15 @@ function generateMaze (cells, opt) {
           break
       }
       wallToBeBreak.type = TYPE_PATH
+      currentPath = nextPath
+    } else {
+      nextPath = unVisitedPaths[random(unVisitedPaths.length)]
+      currentPath = cells[nextPath[0]][nextPath[1]]
     }
-    currentPath = nextPath || unVisitedPaths[random(unVisitedPaths.length)]
   }
   // console.log(flat(cells).map(c => c.type))
   cells.forEach(c => {
-    console.log(c.map(c => c.type))
+    console.log(c.map(c => c.type === TYPE_PATH ? chalk.green(c.type) : c.type).join(' '))
   })
 }
 
