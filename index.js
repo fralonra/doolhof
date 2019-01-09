@@ -28,6 +28,10 @@ class Labyrinth {
   }
 }
 
+function flat (arr, depth = 1) {
+  return arr.reduce((a, v) => a.concat(depth > 1 && Array.isArray(v) ? flat(v, depth - 1) : v), [])
+}
+
 function generateCells (row, col) {
   const cells = []
   for (let i = 0; i < 2 * col + 1; ++i) {
@@ -57,19 +61,44 @@ function generateMaze (cells, opt) {
     start,
     end
   } = opt
-  const unVisitedPaths = cells.flat().filter(c => c.type === TYPE_PATH).map(c => [c.col, c.row])
+  const unVisitedPaths = flat(cells).filter(c => c.type === TYPE_PATH).map(c => [c.col, c.row])
   let currentPath = cells[2 * start[0] + 1][2 * start[1] + 1]
   while (unVisitedPaths.length) {
     currentPath.visited = true
-    unVisitedPaths.splice(unVisitedPaths.indexOf([currentPath.col, currentPath.row]), 1)
+    removeFromCellList(unVisitedPaths, currentPath)
     const nearPaths = getNearPaths(cells, currentPath)
     const availableNearPaths = []
-    nearPaths.forEach(c => {
-      if (!c) return
-      if (!c.visited) availableNearPaths.push(c)
-    })
-    currentPath = availableNearPaths[random(availableNearPaths.length)]
+    // nearPaths.forEach(c => {
+    //   if (!c) return
+    //   if (!c.visited) availableNearPaths.push(c)
+    // })
+    // currentPath = availableNearPaths[random(availableNearPaths.length)]
+    const index = random(nearPaths.length)
+    const nextPath = nearPaths[index]
+    if (nextPath) {
+      let wallToBeBreak
+      switch (index) {
+        case 0:
+          wallToBeBreak = cells[currentPath.col][currentPath.row - 1]
+          break
+        case 1:
+          wallToBeBreak = cells[currentPath.col - 1][currentPath.row]
+          break
+        case 2:
+          wallToBeBreak = cells[currentPath.col][currentPath.row + 1]
+          break
+        case 3:
+          wallToBeBreak = cells[currentPath.col + 1][currentPath.row]
+          break
+      }
+      wallToBeBreak.type = TYPE_PATH
+    }
+    currentPath = nextPath || unVisitedPaths[random(unVisitedPaths.length)]
   }
+  // console.log(flat(cells).map(c => c.type))
+  cells.forEach(c => {
+    console.log(c.map(c => c.type))
+  })
 }
 
 function getNearPaths (cells, cell) {
@@ -93,6 +122,10 @@ function getNearPaths (cells, cell) {
 
 function random (max) {
   return Math.floor(Math.random() * max)
+}
+
+function removeFromCellList (cells, cell) {
+  cells.splice(cells.indexOf([cell.col, cell.row]), 1)
 }
 
 const maze = new Labyrinth()
