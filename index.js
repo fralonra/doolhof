@@ -44,7 +44,7 @@ function generateCells (row, col) {
         y: j
       }
       if (i % 2 === 1 && j % 2 === 1) {
-        cell.type = TYPE_PATH,
+        cell.type = TYPE_PATH
         cell.visited = false
       } else {
         cell.type = TYPE_WALL
@@ -53,6 +53,10 @@ function generateCells (row, col) {
     }
     cells.push(c)
   }
+  cells.forEach(c => c.forEach(cell => {
+    cell.path = getNearPaths(cells, cell)
+    cell.wall = getNearWalls(cells, cell)
+  }))
   return cells
 }
 
@@ -97,28 +101,39 @@ function generateMaze2 (cells, opt) {
     start,
     end
   } = opt
-  const cellSum = row * col
   const visitedPaths = []
+  function handleVisit (currentPath, nextPath) {
+    if (visitedPaths.findIndex(p => ['x', 'y'].every(k => currentPath[k] === p[k])) < 0) {
+      currentPath.visited = true
+      visitedPaths.push(currentPath)
+    }
+    if (nextPath) {
+      cells[(currentPath.x + nextPath.x) / 2]
+        [(currentPath.y + nextPath.y) / 2].type = TYPE_PATH
+    }
+    return nextPath
+  }
+
+  const cellSum = row * col
   let currentPath = cells[2 * start[0] + 1][2 * start[1] + 1]
-  visitedPaths.push(currentPath)
-  while (visitedPaths.length !== cellSum) {
-    const nearPaths = getNearPaths(cells, currentPath)
+  
+  while (visitedPaths.length < cellSum) {
+    const nearPaths = currentPath.path
     let nextPath
     const nearUnVisitedPaths = nearPaths.filter(p => !p.visited)
     if (nearUnVisitedPaths.length) {
-      nextPath = nearUnVisitedPaths[random(nearUnVisitedPaths.length)]
+      nextPath = nearUnVisitedPaths[random(nearUnVisitedPaths.length)]      
     } else {
-      nextPath = visitedPaths[random(visitedPaths.length)]
+      const nearPassage = currentPath.wall.filter(w => w.type === TYPE_PATH)
+      if (!nearPassage.length) {
+        nextPath = nearPaths[random(nearPaths.length)]
+      }
     }
-    currentPath.visited = true
-    cells[(currentPath.x + nextPath.x) / 2]
-      [(currentPath.y + nextPath.y) / 2].type = TYPE_PATH
-    currentPath = nextPath
-    visitedPaths.push(currentPath)
+    currentPath = handleVisit(currentPath, nextPath) || visitedPaths[random(visitedPaths.length)]
   }
   console.timeEnd('gen-maze')
   cells.forEach(c => {
-    console.log(c.map(c => c.type === TYPE_PATH ? chalk.green(c.type) : c.type).join(' '))
+    console.log(c.map(c => c.type === TYPE_PATH ? chalk.green(c.visited ? 'v' : 'n') : c.type).join(' '))
   })
 }
 
@@ -156,20 +171,28 @@ function generateMaze (cells, opt) {
   })
 }
 
+function getNearWalls (cells, cell) {
+  return getNear(cells, cell, 1)
+}
+
 function getNearPaths (cells, cell) {
+  return getNear(cells, cell, 2)
+}
+
+function getNear (cells, cell, distance) {
   const { x, y } = cell
   const paths = []
-  if (cells[x] && cells[x][y - 2]) {
-    paths.push(cells[x][y - 2])
+  if (cells[x] && cells[x][y - distance]) {
+    paths.push(cells[x][y - distance])
   }
-  if (cells[x - 2] && cells[x - 2][y]) {
-    paths.push(cells[x - 2][y])
+  if (cells[x - distance] && cells[x - distance][y]) {
+    paths.push(cells[x - distance][y])
   }
-  if (cells[x] && cells[x][y + 2]) {
-    paths.push(cells[x][y + 2])
+  if (cells[x] && cells[x][y + distance]) {
+    paths.push(cells[x][y + distance])
   }
-  if (cells[x + 2] && cells[x + 2][y]) {
-    paths.push(cells[x + 2][y])
+  if (cells[x + distance] && cells[x + distance][y]) {
+    paths.push(cells[x + distance][y])
   }
   return paths
 }
