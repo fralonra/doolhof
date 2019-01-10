@@ -94,6 +94,8 @@ function generateMaze (cells, opt) {
       const nearPassage = currentPath.wall.filter(w => w.type === TYPE_PATH)
       if (!nearPassage.length) {
         nextPath = nearPaths[random(nearPaths.length)]
+      } else {
+        currentPath.skip = true
       }
     }
     currentPath = handleVisit(currentPath, nextPath) || visitedPaths[random(visitedPaths.length)]
