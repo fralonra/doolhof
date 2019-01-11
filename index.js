@@ -7,8 +7,8 @@ class Labyrinth {
   constructor (opt) {
     const defaultOptions = {
       generate: true,
-      row: 5,
-      col: 5,
+      row: 10,
+      col: 10,
       start: [0, 0]
     }
     defaultOptions.end = [defaultOptions.row - 1, defaultOptions.col - 1]
@@ -86,6 +86,7 @@ function generateMaze (cells, opt) {
   
   while (visitedPaths.length < cellSum) {
     const nearPaths = currentPath.path
+    // console.dir(nearPaths)
     let nextPath
     const nearUnVisitedPaths = nearPaths.filter(p => !p.visited)
     if (nearUnVisitedPaths.length) {
@@ -98,7 +99,16 @@ function generateMaze (cells, opt) {
         currentPath.skip = true
       }
     }
-    currentPath = handleVisit(currentPath, nextPath) || visitedPaths[random(visitedPaths.length)]
+    // currentPath = handleVisit(currentPath, nextPath) || visitedPaths[random(visitedPaths.length)]
+    currentPath = handleVisit(currentPath, nextPath)
+    if (!currentPath) {
+      const unSkippedPaths = cells.filter(c => !c.skip)
+      // console.log(unSkippedPaths)
+      if (unSkippedPaths.length) {
+        currentPath = unSkippedPaths[random(unSkippedPaths.length)]
+        console.log(currentPath, currentPath.path)
+      }
+    }
   }
   console.timeEnd('gen-maze')
   cells.forEach(c => {
