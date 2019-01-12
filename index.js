@@ -7,8 +7,8 @@ class Labyrinth {
   constructor (opt) {
     const defaultOptions = {
       generate: true,
-      row: 100,
-      col: 100,
+      row: 10,
+      col: 10,
       start: [0, 0]
     }
     defaultOptions.end = [defaultOptions.row - 1, defaultOptions.col - 1]
