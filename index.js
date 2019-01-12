@@ -7,8 +7,8 @@ class Labyrinth {
   constructor (opt) {
     const defaultOptions = {
       generate: true,
-      row: 10,
-      col: 10,
+      row: 100,
+      col: 100,
       start: [0, 0]
     }
     defaultOptions.end = [defaultOptions.row - 1, defaultOptions.col - 1]
@@ -68,15 +68,20 @@ function generateMaze (cells, opt) {
     start,
     end
   } = opt
+  let lastPassage
   const visitedPaths = []
+  const unSkippedPaths = []
+  flat(cells).filter(c => c.type === TYPE_PATH).forEach((c, i) => {
+    unSkippedPaths[i] = c
+  })
   function handleVisit (currentPath, nextPath) {
     if (visitedPaths.findIndex(p => ['x', 'y'].every(k => currentPath[k] === p[k])) < 0) {
       currentPath.visited = true
       visitedPaths.push(currentPath)
     }
     if (nextPath) {
-      cells[(currentPath.x + nextPath.x) / 2]
-        [(currentPath.y + nextPath.y) / 2].type = TYPE_PATH
+      lastPassage = cells[(currentPath.x + nextPath.x) / 2][(currentPath.y + nextPath.y) / 2]
+      lastPassage.type = TYPE_PATH
     }
     return nextPath
   }
@@ -95,18 +100,20 @@ function generateMaze (cells, opt) {
       const nearPassage = currentPath.wall.filter(w => w.type === TYPE_PATH)
       if (!nearPassage.length) {
         nextPath = nearPaths[random(nearPaths.length)]
-      } else {
-        currentPath.skip = true
+      } else if (nearPassage.length !== 1 ||
+        (nearPassage.lengh === 1 && lastPassage.x !== nearPassage[0].x && lastPassage.y !== nearPassage[0].y)) {
+        unSkippedPaths.splice(unSkippedPaths.findIndex(p => p.x === currentPath.x && p.y === currentPath.y), 1)
+        // currentPath.skip = true
       }
     }
     // currentPath = handleVisit(currentPath, nextPath) || visitedPaths[random(visitedPaths.length)]
     currentPath = handleVisit(currentPath, nextPath)
     if (!currentPath) {
-      const unSkippedPaths = cells.filter(c => !c.skip)
+      // const unSkippedPaths = flat(cells).filter(c => !c.skip)
       // console.log(unSkippedPaths)
       if (unSkippedPaths.length) {
         currentPath = unSkippedPaths[random(unSkippedPaths.length)]
-        console.log(currentPath, currentPath.path)
+        // console.log(currentPath, currentPath.path)
       }
     }
   }
