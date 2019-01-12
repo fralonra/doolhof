@@ -86,7 +86,6 @@ function generateMaze (cells, opt) {
   
   while (visitedPaths.length < cellSum) {
     const nearPaths = currentPath.path
-    // console.dir(nearPaths)
     let nextPath
     const nearUnVisitedPaths = nearPaths.filter(p => !p.visited)
     if (nearUnVisitedPaths.length) {
@@ -95,25 +94,14 @@ function generateMaze (cells, opt) {
       const nearPassage = currentPath.wall.filter(w => w.type === TYPE_PATH)
       if (!nearPassage.length) {
         nextPath = nearPaths[random(nearPaths.length)]
-      } else {
-        currentPath.skip = true
       }
     }
-    // currentPath = handleVisit(currentPath, nextPath) || visitedPaths[random(visitedPaths.length)]
-    currentPath = handleVisit(currentPath, nextPath)
-    if (!currentPath) {
-      const unSkippedPaths = cells.filter(c => !c.skip)
-      // console.log(unSkippedPaths)
-      if (unSkippedPaths.length) {
-        currentPath = unSkippedPaths[random(unSkippedPaths.length)]
-        console.log(currentPath, currentPath.path)
-      }
-    }
+    currentPath = handleVisit(currentPath, nextPath) || visitedPaths[random(visitedPaths.length)]
   }
   console.timeEnd('gen-maze')
-  cells.forEach(c => {
-    console.log(c.map(c => c.type === TYPE_PATH ? chalk.green(c.visited ? 'v' : 'n') : c.type).join(' '))
-  })
+  // cells.forEach(c => {
+  //   console.log(c.map(c => c.type === TYPE_PATH ? chalk.green(c.visited ? 'v' : 'n') : c.type).join(' '))
+  // })
 }
 
 function getNearWalls (cells, cell) {
