@@ -1,32 +1,37 @@
-const chalk = require('chalk')
-
 const TYPE_WALL = 0
-const TYPE_PATH = '+'
+const TYPE_PATH = 1
+const chalk = require('chalk')
 
 class Labyrinth {
   constructor (opt) {
     const defaultOptions = {
       generate: true,
       row: 10,
-      col: 10,
-      start: [0, 0]
+      col: 10
     }
-    defaultOptions.end = [defaultOptions.row - 1, defaultOptions.col - 1]
     this.options = {
       ...defaultOptions,
       ...opt
     }
+    this.fmtMaze = null
     if (this.options.generate) {
       this.generate()
     }
   }
 
   generate () {
-    const {
-      row,
-      col
-    } = this.options
-    generateMaze(generateCells(row, col), this.options)
+    console.time('gen-maze')
+    const rawMaze = generateCells(this.options)
+    generateMaze(rawMaze, this.options)
+    this.fmtMaze = formatMaze(rawMaze, this.options)
+    this.fmtMaze.raw.forEach(c => {
+      console.log(c.map(c => c ? chalk.green('o') : '·').join(' '))
+    })
+    console.timeEnd('gen-maze')
+  }
+
+  get () {
+    return this.fmtMaze
   }
 }
 
@@ -34,7 +39,25 @@ function flat (arr, depth = 1) {
   return arr.reduce((a, v) => a.concat(depth > 1 && Array.isArray(v) ? flat(v, depth - 1) : v), [])
 }
 
-function generateCells (row, col) {
+function formatMaze (raw, opt) {
+  const {
+    row,
+    col
+  } = opt
+  return {
+    meta: {
+      row,
+      col
+    },
+    raw: raw.map(r => r.map(c => c.type === TYPE_PATH ? true : false))
+  }
+}
+
+function generateCells (opt) {
+  const {
+    row,
+    col,
+  } = opt
   const cells = []
   for (let i = 0; i < 2 * col + 1; ++i) {
     const c = []
@@ -61,12 +84,9 @@ function generateCells (row, col) {
 }
 
 function generateMaze (cells, opt) {
-  console.time('gen-maze')
   const {
     row,
-    col,
-    start,
-    end
+    col
   } = opt
   let lastPassage
   const visitedPaths = []
@@ -75,46 +95,39 @@ function generateMaze (cells, opt) {
     unSkippedPaths[i] = c
   })
   function handleVisit (currentPath, nextPath) {
-    if (visitedPaths.findIndex(p => ['x', 'y'].every(k => currentPath[k] === p[k])) < 0) {
+    if (!currentPath.visited) {
       currentPath.visited = true
       visitedPaths.push(currentPath)
     }
     if (nextPath) {
       lastPassage = cells[(currentPath.x + nextPath.x) / 2][(currentPath.y + nextPath.y) / 2]
       lastPassage.type = TYPE_PATH
+    } else {
+      lastPassage = null
     }
     return nextPath
   }
 
   const cellSum = row * col
-  let currentPath = cells[2 * start[0] + 1][2 * start[1] + 1]
-  
+  let currentPath = cells[1][1]
+
   while (visitedPaths.length < cellSum) {
     const nearPaths = currentPath.path
     let nextPath
     const nearUnVisitedPaths = nearPaths.filter(p => !p.visited)
     if (nearUnVisitedPaths.length) {
-      nextPath = nearUnVisitedPaths[random(nearUnVisitedPaths.length)]      
+      nextPath = nearUnVisitedPaths[random(nearUnVisitedPaths.length)]
     } else {
       const nearPassage = currentPath.wall.filter(w => w.type === TYPE_PATH)
       if (!nearPassage.length) {
         nextPath = nearPaths[random(nearPaths.length)]
       } else if (nearPassage.length !== 1 ||
-        (nearPassage.lengh === 1 && lastPassage.x !== nearPassage[0].x && lastPassage.y !== nearPassage[0].y)) {
+        (lastPassage && nearPassage.lengh === 1 && lastPassage.x !== nearPassage[0].x && lastPassage.y !== nearPassage[0].y)) {
         unSkippedPaths.splice(unSkippedPaths.findIndex(p => p.x === currentPath.x && p.y === currentPath.y), 1)
       }
     }
-    currentPath = handleVisit(currentPath, nextPath)
-    if (!currentPath) {
-      if (unSkippedPaths.length) {
-        currentPath = unSkippedPaths[random(unSkippedPaths.length)]
-      }
-    }
+    currentPath = handleVisit(currentPath, nextPath) || visitedPaths[random(visitedPaths.length)]
   }
-  console.timeEnd('gen-maze')
-  // cells.forEach(c => {
-  //   console.log(c.map(c => c.type === TYPE_PATH ? chalk.green(c.visited ? 'v' : 'n') : c.type).join(' '))
-  // })
 }
 
 function getNearWalls (cells, cell) {
@@ -151,4 +164,6 @@ function removeFromCellList (cells, cell) {
   cells.splice(cells.indexOf([cell.x, cell.y]), 1)
 }
 
-const maze = new Labyrinth()
+new Labyrinth()
+
+// export default Labyrinth
