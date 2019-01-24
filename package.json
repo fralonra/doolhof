@@ -6,9 +6,9 @@
   "scripts": {
     "build": "rollup -c rollup.config.js",
     "prepare": "npm run build",
-    "lint": "standard --fix src/*.js | snazzy",
-    "test": "npm run lint && npm run test:unit && npm run test:bench",
-    "test:unit": "tap tests/*.js --cov --coverage-report=lcov"
+    "lint": "standard --fix lib/*.js | snazzy",
+    "test": "npm run lint && npm run test:unit",
+    "test:unit": "tap test/*.js -c --cov --coverage-report=lcov"
   },
   "author": "",
   "license": "ISC",
