@@ -1,6 +1,5 @@
 const TYPE_WALL = 0
 const TYPE_PATH = 1
-const chalk = require('chalk')
 
 class Labyrinth {
   constructor (opt) {
@@ -8,11 +7,14 @@ class Labyrinth {
       generate: true,
       row: 10,
       col: 10,
-      print: false
+      start: [1, 0]
     }
     this.options = {
       ...defaultOptions,
       ...opt
+    }
+    if (!this.options.end) {
+      this.options.end = [2 * this.options.col - 1, 2 * this.options.row]
     }
     this.fmtMaze = null
     if (this.options.generate) {
@@ -21,16 +23,9 @@ class Labyrinth {
   }
 
   generate () {
-    console.time('gen-maze')
     const rawMaze = generateCells(this.options)
     generateMaze(rawMaze, this.options)
     this.fmtMaze = formatMaze(rawMaze, this.options)
-    if (this.options.print) {
-      this.fmtMaze.raw.forEach(c => {
-        console.log(c.map(c => c ? chalk.green('o') : '·').join(' '))
-      })
-    }
-    console.timeEnd('gen-maze')
   }
 
   get () {
@@ -45,12 +40,16 @@ function flat (arr, depth = 1) {
 function formatMaze (raw, opt) {
   const {
     row,
-    col
+    col,
+    start,
+    end
   } = opt
   return {
     meta: {
       row,
-      col
+      col,
+      start,
+      end
     },
     raw: raw.map(r => r.map(c => c.type === TYPE_PATH))
   }
@@ -62,9 +61,9 @@ function generateCells (opt) {
     col
   } = opt
   const cells = []
-  for (let i = 0; i < 2 * row + 1; ++i) {
+  for (let i = 0; i < 2 * col + 1; ++i) {
     const c = []
-    for (let j = 0; j < 2 * col + 1; ++j) {
+    for (let j = 0; j < 2 * row + 1; ++j) {
       const cell = {
         x: i,
         y: j
@@ -89,7 +88,9 @@ function generateCells (opt) {
 function generateMaze (cells, opt) {
   const {
     row,
-    col
+    col,
+    start,
+    end
   } = opt
   let lastPassage
   const visitedPaths = []
@@ -131,6 +132,9 @@ function generateMaze (cells, opt) {
     }
     currentPath = handleVisit(currentPath, nextPath) || visitedPaths[random(visitedPaths.length)]
   }
+
+  cells[start[0]][start[1]].type = TYPE_PATH
+  cells[end[0]][end[1]].type = TYPE_PATH
 }
 
 function getNearWalls (cells, cell) {
@@ -167,9 +171,4 @@ function removeFromCellList (cells, cell) {
   cells.splice(cells.indexOf([cell.x, cell.y]), 1)
 }
 
-new Labyrinth({
-  row: 5,
-  col: 10
-})
-
-module.exports = Labyrinth
+export default Labyrinth

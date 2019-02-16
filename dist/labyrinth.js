@@ -1,23 +1,27 @@
-(function (factory) {
+(function (global, factory) {
+  typeof exports === 'object' && typeof module !== 'undefined' ? module.exports = factory() :
   typeof define === 'function' && define.amd ? define(factory) :
-  factory();
-}(function () { 'use strict';
+  (global = global || self, global.Labyrinth = factory());
+}(this, function () { 'use strict';
 
   const TYPE_WALL = 0;
   const TYPE_PATH = 1;
-  const chalk = require('chalk');
 
   class Labyrinth {
     constructor (opt) {
       const defaultOptions = {
         generate: true,
         row: 10,
-        col: 10
+        col: 10,
+        start: [1, 0]
       };
       this.options = {
         ...defaultOptions,
         ...opt
       };
+      if (!this.options.end) {
+        this.options.end = [2 * this.options.col - 1, 2 * this.options.row];
+      }
       this.fmtMaze = null;
       if (this.options.generate) {
         this.generate();
@@ -25,14 +29,9 @@
     }
 
     generate () {
-      console.time('gen-maze');
       const rawMaze = generateCells(this.options);
       generateMaze(rawMaze, this.options);
       this.fmtMaze = formatMaze(rawMaze, this.options);
-      this.fmtMaze.raw.forEach(c => {
-        console.log(c.map(c => c ? chalk.green('o') : '·').join(' '));
-      });
-      console.timeEnd('gen-maze');
     }
 
     get () {
@@ -47,21 +46,25 @@
   function formatMaze (raw, opt) {
     const {
       row,
-      col
+      col,
+      start,
+      end
     } = opt;
     return {
       meta: {
         row,
-        col
+        col,
+        start,
+        end
       },
-      raw: raw.map(r => r.map(c => c.type === TYPE_PATH ? true : false))
+      raw: raw.map(r => r.map(c => c.type === TYPE_PATH))
     }
   }
 
   function generateCells (opt) {
     const {
       row,
-      col,
+      col
     } = opt;
     const cells = [];
     for (let i = 0; i < 2 * col + 1; ++i) {
@@ -91,7 +94,9 @@
   function generateMaze (cells, opt) {
     const {
       row,
-      col
+      col,
+      start,
+      end
     } = opt;
     let lastPassage;
     const visitedPaths = [];
@@ -133,6 +138,9 @@
       }
       currentPath = handleVisit(currentPath, nextPath) || visitedPaths[random(visitedPaths.length)];
     }
+
+    cells[start[0]][start[1]].type = TYPE_PATH;
+    cells[end[0]][end[1]].type = TYPE_PATH;
   }
 
   function getNearWalls (cells, cell) {
@@ -165,8 +173,6 @@
     return Math.floor(Math.random() * max)
   }
 
-  new Labyrinth();
-
-  // export default Labyrinth
+  return Labyrinth;
 
 }));

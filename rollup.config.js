@@ -2,7 +2,7 @@ import { terser } from 'rollup-plugin-terser'
 import filesize from 'rollup-plugin-filesize'
 
 export default [{
-  input: 'index.js',
+  input: 'src/index.js',
   plugins: [filesize()],
   output: {
     file: 'dist/labyrinth.js',
@@ -10,7 +10,7 @@ export default [{
     name: 'Labyrinth'
   }
 }, {
-  input: 'index.js',
+  input: 'src/index.js',
   plugins: [terser(), filesize()],
   output: {
     file: 'dist/labyrinth.min.js',
