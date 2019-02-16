@@ -5,7 +5,7 @@ export default [{
   input: 'src/index.js',
   plugins: [filesize()],
   output: {
-    file: 'dist/labyrinth.js',
+    file: 'dist/doolhof.js',
     format: 'umd',
     name: 'Labyrinth'
   }
@@ -13,7 +13,7 @@ export default [{
   input: 'src/index.js',
   plugins: [terser(), filesize()],
   output: {
-    file: 'dist/labyrinth.min.js',
+    file: 'dist/doolhof.min.js',
     format: 'umd',
     name: 'Labyrinth'
   }

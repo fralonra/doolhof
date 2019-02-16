@@ -1,7 +1,7 @@
 const TYPE_WALL = 0
 const TYPE_PATH = 1
 
-class Labyrinth {
+class Doolhof {
   constructor (opt) {
     const defaultOptions = {
       generate: true,
@@ -171,4 +171,4 @@ function removeFromCellList (cells, cell) {
   cells.splice(cells.indexOf([cell.x, cell.y]), 1)
 }
 
-export default Labyrinth
+export default Doolhof
