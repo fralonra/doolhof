@@ -1,13 +1,13 @@
 (function (global, factory) {
   typeof exports === 'object' && typeof module !== 'undefined' ? module.exports = factory() :
   typeof define === 'function' && define.amd ? define(factory) :
-  (global = global || self, global.Labyrinth = factory());
+  (global = global || self, global.Doolhof = factory());
 }(this, function () { 'use strict';
 
   const TYPE_WALL = 0;
   const TYPE_PATH = 1;
 
-  class Labyrinth {
+  class Doolhof {
     constructor (opt) {
       const defaultOptions = {
         generate: true,
@@ -173,6 +173,6 @@
     return Math.floor(Math.random() * max)
   }
 
-  return Labyrinth;
+  return Doolhof;
 
 }));

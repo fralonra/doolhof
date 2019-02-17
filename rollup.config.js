@@ -7,7 +7,7 @@ export default [{
   output: {
     file: 'dist/doolhof.js',
     format: 'umd',
-    name: 'Labyrinth'
+    name: 'Doolhof'
   }
 }, {
   input: 'src/index.js',
@@ -15,6 +15,6 @@ export default [{
   output: {
     file: 'dist/doolhof.min.js',
     format: 'umd',
-    name: 'Labyrinth'
+    name: 'Doolhof'
   }
 }]
