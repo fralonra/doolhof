@@ -4,7 +4,6 @@ const TYPE_PATH = 1
 class Doolhof {
   constructor (opt) {
     const defaultOptions = {
-      generate: true,
       row: 10,
       col: 10,
       start: [1, 0]
@@ -17,9 +16,7 @@ class Doolhof {
       this.options.end = [2 * this.options.col - 1, 2 * this.options.row]
     }
     this.fmtMaze = null
-    if (this.options.generate) {
-      this.generate()
-    }
+    this.generate()
   }
 
   generate () {
