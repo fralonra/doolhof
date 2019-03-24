@@ -1,7 +1,6 @@
 export as namespace Doolhof
 
 interface DoolhofOptions {
-  generate?: boolean
   row?: number
   col?: number
   start?: Array<number>
@@ -26,7 +25,7 @@ declare class Doolhof {
   constructor(options: DoolhofOptions)
 
   /**
-   * Manually generate the maze
+   * Generate the maze
    * */
   generate(): void
 
