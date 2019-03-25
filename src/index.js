@@ -164,8 +164,4 @@ function random (max) {
   return Math.floor(Math.random() * max)
 }
 
-function removeFromCellList (cells, cell) {
-  cells.splice(cells.indexOf([cell.x, cell.y]), 1)
-}
-
 export default Doolhof
