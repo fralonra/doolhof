@@ -6,7 +6,8 @@
   "scripts": {
     "build": "rollup -c rollup.config.js",
     "prepare": "npm run build",
-    "lint": "standard --fix lib/*.js | snazzy"
+    "lint": "standard --fix lib/*.js | snazzy",
+    "test": "npm run lint"
   },
   "repository": {
     "type": "git",
