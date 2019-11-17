@@ -1,6 +1,6 @@
 {
   "name": "doolhof",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "description": "Generate a labyrinth using Prim's algorithm",
   "main": "src/index.js",
   "scripts": {
